@@ -100,5 +100,42 @@ public class EmployeeController {
         return Result.success(pageResult);
     }
 
+    /**
+     * 启用禁用员工账号
+     * @param status
+     * @param id
+     * @PathVariable:修饰路径参数
+     */
+    @PostMapping("/status/{status}")
+    @ApiOperation("启用禁用员工账号")//描述接口
+    public Result startOrStop(@PathVariable Integer status, Long id) {
+        log.info("员工状态：{}，员工id：{}", status, id);
+        employeeService.startOrStop(status, id);
+        return Result.success();
+    }
 
+    /**
+     * 查询回显
+     * @param id
+     */
+    @GetMapping("/{id}")
+    @ApiOperation("查询回显")
+    public Result<Employee> getById(@PathVariable Long id) {
+        log.info("查询回显:{}", id);
+        Employee employee = employeeService.getById(id);
+        return Result.success(employee);
+    }
+
+    /**
+     * 编辑员工信息
+     * @param employeeDTO
+     */
+
+    @PutMapping
+    @ApiOperation("编辑员工信息")
+    public Result update(@RequestBody EmployeeDTO employeeDTO){
+        log.info("编辑员工信息:{}", employeeDTO);
+        employeeService.update(employeeDTO);
+        return Result.success();
+    }
 }
