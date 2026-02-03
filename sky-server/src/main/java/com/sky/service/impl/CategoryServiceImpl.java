@@ -53,8 +53,8 @@ public class CategoryServiceImpl implements CategoryService {
         //对象属性拷贝
         Category category = new Category();
         BeanUtils.copyProperties(categoryDTO, category);
-        category.setUpdateTime(LocalDateTime.now());
-        category.setUpdateUser(BaseContext.getCurrentId());
+        /*category.setUpdateTime(LocalDateTime.now());
+        category.setUpdateUser(BaseContext.getCurrentId());*/
         categoryMapper.update(category);
     }
 
@@ -80,10 +80,10 @@ public class CategoryServiceImpl implements CategoryService {
     public void save(CategoryDTO categoryDTO) {
         Category category = new Category();
         BeanUtils.copyProperties(categoryDTO, category);
-        category.setCreateTime(LocalDateTime.now());
+        /*category.setCreateTime(LocalDateTime.now());
         category.setUpdateTime(LocalDateTime.now());
         category.setCreateUser(BaseContext.getCurrentId());
-        category.setUpdateUser(BaseContext.getCurrentId());
+        category.setUpdateUser(BaseContext.getCurrentId());*/
         category.setStatus(1);
         categoryMapper.insert(category);
     }
@@ -109,6 +109,5 @@ public class CategoryServiceImpl implements CategoryService {
     public List<Category> listByType(Integer type) {
         return categoryMapper.listByType(type);
     }
-
 
 }

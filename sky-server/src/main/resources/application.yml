@@ -16,6 +16,27 @@ spring:
     url: jdbc:mysql://localhost:3306/sky_take_out?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true
     username: root
     password: zcl201314
+    druid:
+      # 连接池初始化大小
+      initial-size: 5
+      # 最小空闲连接数
+      min-idle: 5
+      # 最大连接数
+      max-active: 20
+      # 配置检测连接是否有效的 SQL
+      validation-query: SELECT 1
+      # 申请连接时检测（重要）
+      test-on-borrow: true
+      # 归还连接时检测
+      test-on-return: false
+      # 空闲时检测（重要）
+      test-while-idle: true
+      # 检测间隔时间（毫秒）
+      time-between-eviction-runs-millis: 60000
+      # 连接最小生存时间（毫秒）
+      min-evictable-idle-time-millis: 300000
+      # 连接最大生存时间（毫秒），要小于 MySQL 的 wait_timeout
+      max-evictable-idle-time-millis: 900000
 
 
 mybatis:
