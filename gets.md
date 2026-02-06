@@ -131,3 +131,32 @@ public class AutoFillAspect {
 ```
 # day04
 + *Mapper.xml中动态SQL写法
+
++ Spring Data Redis使用步骤
+  + 导入Maven坐标
+  + 配置redis数据源
+  + 编写配置类，创建RedisTemplate对象
+  + 通过RedisTemplate操作Redis
+```java
+@Configuration//配置类
+@Slf4j
+public class RedisConfiguration {
+
+    @Bean
+    public RedisTemplate redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        log.info("开始创建RedisTemplate对象...");
+        //创建RedisTemplate对象
+        RedisTemplate redisTemplate = new RedisTemplate();
+        //设置redis连接工厂
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        //设置redis key的序列化器
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        return redisTemplate;
+    }
+}
+```
++ DTO和VO
+  + DTO (Data Transfer Object) 数据传输对象
+      方向：前端 -> 后端 （主要是接收前端传来的参数）---Reason:前端传来数据往往和数据库表结构不一致
+  + VO (View Object) 视图对象
+    方向：后端 -> 前端 （主要是发给前端展示的数据） 作用：封装后端要展示给用户看的数据---Reason:数据库里的数据，往往不能直接给用户看，或者不够看。
