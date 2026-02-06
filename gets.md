@@ -129,3 +129,5 @@ public class AutoFillAspect {
     }
 }
 ```
+# day04
++ *Mapper.xml中动态SQL写法
