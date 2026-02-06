@@ -8,6 +8,9 @@ sky:
     password: zcl201314
   alioss:
     endpoint: oss-cn-shenzhen.aliyuncs.com
-    access-key-id: YOUR_ACCESS_KEY_ID_HERE
-    access-key-secret: YOUR_ACCESS_KEY_SECRET_HERE
+    access-key-id: YOUR_ACCESS_KEY_ID
+    access-key-secret: YOUR_ACCESS_KEY_SECRET
     bucket-name: sky-take-out-zcl
+
+# access-key-id: YOUR_ACCESS_KEY_ID
+# access-key-secret: YOUR_ACCESS_KEY_SECRET
