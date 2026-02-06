@@ -29,7 +29,7 @@ import java.util.List;
 public class DishServiceImpl implements DishService {
 
     @Autowired
-    private DishMapper dishMaper;
+    private DishMapper dishMapper;
     @Autowired
     private DishFlavorMapper dishFlavorMapper;
     @Autowired
@@ -44,7 +44,7 @@ public class DishServiceImpl implements DishService {
         Dish dish = new Dish();
         BeanUtils.copyProperties(dishDTO,dish);
         //插入一条菜品数据
-        dishMaper.insert(dish);
+        dishMapper.insert(dish);
         //获取插入的菜品的id---这样的SQL语句需要学习---useGeneratedKeys = true keyProperty = "id"
         Long dishId = dish.getId();
         //向口味表插入n条数据
@@ -69,7 +69,7 @@ public class DishServiceImpl implements DishService {
     @Override
     public PageResult pageQuery(DishPageQueryDTO dishPageQueryDTO) {
         PageHelper.startPage(dishPageQueryDTO.getPage(), dishPageQueryDTO.getPageSize());
-        Page< DishVO> page = dishMaper.pageQuery(dishPageQueryDTO);
+        Page< DishVO> page = dishMapper.pageQuery(dishPageQueryDTO);
         return new PageResult(page.getTotal(), page.getResult());
 
     }
@@ -83,7 +83,7 @@ public class DishServiceImpl implements DishService {
     public void deleteBatch(List<Long> ids) {
         //判断当前菜品是否能够删除---是否存在起售中？？
         for (Long id : ids) {
-            Dish dish = dishMaper.getById(id);
+            Dish dish = dishMapper.getById(id);
             if(dish.getStatus() == StatusConstant.ENABLE) {
                 throw new DeletionNotAllowedException(MessageConstant.DISH_ON_SALE);
             }
@@ -101,7 +101,7 @@ public class DishServiceImpl implements DishService {
         }*/
         //优化：批量删除
         //delete from dish where id in (?,?,?)
-        dishMaper.deleteByIds(ids);
+        dishMapper.deleteByIds(ids);
         //delete from dish_flavor where dish_id in (?,?,?)
         dishFlavorMapper.deleteByDishIds(ids);
     }
@@ -114,7 +114,7 @@ public class DishServiceImpl implements DishService {
     @Override
     public DishVO getByIdWithFlavor(Long id) {
         //根据id查询菜品数据
-        Dish dish = dishMaper.getById(id);
+        Dish dish = dishMapper.getById(id);
         //根据菜品id查询口味数据
         List<DishFlavor> dishFlavors = dishFlavorMapper.getByDishId(id);
         //组装VO数据并返回
@@ -133,7 +133,7 @@ public class DishServiceImpl implements DishService {
         Dish dish = new Dish();
         BeanUtils.copyProperties(dishDTO,dish);
         //修改菜品表基本信息
-        dishMaper.update(dish);
+        dishMapper.update(dish);
         //删除原有口味数据
         dishFlavorMapper.deleteByDishId(dishDTO.getId());
         //重新插入口味数据
@@ -143,5 +143,19 @@ public class DishServiceImpl implements DishService {
                     dishFlavor.setDishId(dishDTO.getId()));
         }
         dishFlavorMapper.insertBatch(flavors);
+    }
+
+    /**
+     * 批量起售停售
+     * @param status
+     * @param id
+     */
+    @Override
+    public void startOrStop(Integer status, Long id) {
+        Dish dish = Dish.builder()
+                .id(id)
+                .status(status)
+                .build();
+        dishMapper.update(dish);
     }
 }
