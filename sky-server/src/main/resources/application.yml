@@ -19,8 +19,8 @@ spring:
   datasource:
     # driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/sky_take_out?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true
-    username: root
-    password: zcl201314
+    username: ${sky.datasource.username}
+    password: ${sky.datasource.password}
     druid:
       # 连接池初始化大小
       initial-size: 5
@@ -68,8 +68,18 @@ sky:
     admin-ttl: 7200000000
     # 设置前端传递过来的令牌名称
     admin-token-name: token
+
+    user-secret-key: itheima
+    user-ttl: 7200000000
+    user-token-name: authentication
+
+
   alioss:
     endpoint: ${sky.alioss.endpoint}
     access-key-id: ${sky.alioss.access-key-id}
     access-key-secret: ${sky.alioss.access-key-secret}
     bucket-name: ${sky.alioss.bucket-name}
+
+  wechat:
+    appid: ${sky.wechat.appid}
+    appsecret: ${sky.wechat.secret}

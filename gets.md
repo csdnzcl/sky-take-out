@@ -1,4 +1,5 @@
-# day01
+# 苍穹外卖学习
+## day01
 1. 完成了苍穹外卖的环境搭建，学习知识点：
 + **Nginx的反向代理机制**：在Nginx.conf中进行配置
     + 提高访问速度
@@ -12,7 +13,7 @@
     <lombok>1.18.30</lombok> 
     </properties>
     + <dependencyManagement>： 统一管理所有依赖版本，子模块只声明 groupId 和 artifactId
-# day02
+## day02
 1. 员工管理
 + @RestController:
 + @RequestMapping("/admin/employee")：统一地址前缀
@@ -58,7 +59,7 @@
         employee.setUpdateUser(BaseContext.getCurrentId());
         employeeMapper.insert(employee);
 ```
-# day03
+## day03 菜品管理
 1. 公共字段自动填充
 + 反射机制
 + 动态代理
@@ -69,7 +70,7 @@
 @Retention(RetentionPolicy.RUNTIME)// 表示该注解在运行时生效
 public @interface AutoFill {
     // 枚举值，用于指定填充数据的操作类型 Update,  Insert
-    OperationType value();
+    com.sky.enumeration.OperationType value();//包括UPDATE, INSERT
 }
 ```
   + 自定义切面类，对加了AutoFill注解的方法进行AOP处理
@@ -91,9 +92,12 @@ public class AutoFillAspect {
     @Before("autoFillPointCut()")//前置通知
     public void autoFill(JoinPoint joinPoint){
       //获取当前被拦截的方法上的数据库操作类型---不同类型操作，所对应的字段填充不同
-      MethodSignature signature = (MethodSignature) joinPoint.getSignature();//获取方法签名
-      AutoFill autoFill = signature.getMethod().getAnnotation(AutoFill.class);//获取方法上的注解对象
-      OperationType operationType = autoFill.value() ;//获取数据库操作类型
+      //获取方法签名
+      MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+      //获取方法上的注解对象
+      AutoFill autoFill = signature.getMethod().getAnnotation(AutoFill.class);
+      //获取数据库操作类型
+      OperationType operationType = autoFill.value() ;
 
       //获取到当前被拦截的方法参数--实体对象
       Object[] args = joinPoint.getArgs();
@@ -129,15 +133,59 @@ public class AutoFillAspect {
     }
 }
 ```
-# day04
-+ *Mapper.xml中动态SQL写法
 
-+ Spring Data Redis使用步骤
-  + 导入Maven坐标
-  + 配置redis数据源
-  + 编写配置类，创建RedisTemplate对象
-  + 通过RedisTemplate操作Redis
+## day04 菜品管理 + 设置店铺状态
+1. *Mapper.xml中动态SQL写法:以苍穹外卖中菜品搜索接口为例
+```SQL
+<select id="listDishes" resultType="com.sky.entity.Dish">
+    SELECT * FROM dish
+    <where>
+        <if test="name != null and name != ''">
+            AND name LIKE concat('%', #{name}, '%')
+        </if>
+        
+        <if test="categoryId != null">
+            AND category_id = #{categoryId}
+        </if>
+        
+        <if test="ids != null and ids.size > 0">
+            AND id IN
+            <foreach collection="ids" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+    </where>
+</select>
+
+<update id="updateDish">
+    UPDATE dish
+    <set>
+        <if test="name != null"> name = #{name}, </if>
+        <if test="price != null"> price = #{price}, </if>
+        <if test="image != null"> image = #{image}, </if>
+    </set>
+    WHERE id = #{id}
+</update>
+
+<!--注意：update中的set标签，里面的if需要加逗号-->
+```
++ 知识点拆解：
+  + where标签：写 WHERE 关键字 + 智能去除开头的 AND 或 OR（核心）
+  + if 标签：String类型：既要判null,又要判断空串''
+  + foreach标签：
+    + collection="ids"：DTO 里那个List集合的属性名--变量名
+    + item="id"：给遍历出来的每个元素起个临时变量名（下面 #{} 里就填这个）
+    + open="("：循环开始前，加个左括号
+    + close=")"：循环结束后，加个右括号
+    + separator=","：每次循环中间，加个逗号。
+    + 生成结果：(101, 102, 103)
+2. Spring Data Redis使用步骤
++ 导入Maven坐标
++ 配置redis数据源
++ 编写配置类，创建RedisTemplate对象
++ 通过RedisTemplate操作Redis
 ```java
+//编写配置类方法
 @Configuration//配置类
 @Slf4j
 public class RedisConfiguration {
@@ -155,8 +203,73 @@ public class RedisConfiguration {
     }
 }
 ```
-+ DTO和VO
-  + DTO (Data Transfer Object) 数据传输对象
+3. 使用alioss文件上传
+  + 引入坐标 + 配置文件中进行配置
+  + 创建阿里云文件上传工具类对象的bean
+```java
+/**
+ * 阿里云文件上传配置
+ * 用于创建AliOssUtil对象
+ */
+
+@Configuration
+@Slf4j
+public class OssConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean//当容器中没有这个bean时，创建这个bean
+    public AliOssUtil aliOssUtil(AliOssProperties aliOssProperties) {
+        log.info("开始创建阿里云文件上传工具类对象：{}", aliOssProperties);
+        return new AliOssUtil(aliOssProperties.getEndpoint(), aliOssProperties.getAccessKeyId(), aliOssProperties.getAccessKeySecret(), aliOssProperties.getBucketName());
+        //aliOssProperties中使用@ConfigurationProperties(prefix = "sky.alioss")//配置属性类，读取application.yml中的属性
+    }
+}
+```
+  + 开发文件上传接口
+```java
+@RestController
+@RequestMapping("/admin/common")
+@Api(tags = "通用接口")
+@Slf4j
+public class CommonController {
+
+    @Autowired
+    private AliOssUtil aliOssUtil;
+
+    /**
+     * 文件上传
+     * @param file
+     * @return
+     */
+    @PostMapping("/upload")
+    @ApiOperation("文件上传")
+    public Result<String> upload(MultipartFile file) {
+        log.info("文件上传：{}", file);
+        try {
+            //原始文件名
+            String originalFileName = file.getOriginalFilename();
+            //截取原始文件名的后缀   dfdfdf.png
+            String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+            //构造新文件名称
+            String objectName = UUID.randomUUID().toString() + extension;
+            //文件请求路径
+            String filePath = aliOssUtil.upload(file.getBytes(), objectName);
+            return Result.success(filePath);
+        } catch (IOException e) {
+            log.error("文件上传失败：{}", e);
+        }
+        return Result.error(MessageConstant.UPLOAD_FAILED);
+    }
+
+}
+
+
+```
+4. DTO和VO
++ DTO (Data Transfer Object) 数据传输对象
       方向：前端 -> 后端 （主要是接收前端传来的参数）---Reason:前端传来数据往往和数据库表结构不一致
-  + VO (View Object) 视图对象
++ VO (View Object) 视图对象
     方向：后端 -> 前端 （主要是发给前端展示的数据） 作用：封装后端要展示给用户看的数据---Reason:数据库里的数据，往往不能直接给用户看，或者不够看。
+5. @Transaction：开启事务---多表操作
+6. @PathVariable 路径参数
+7. HttpClien

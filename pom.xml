@@ -30,6 +30,9 @@
         <jjwt>0.9.1</jjwt>
         <jaxb-api>2.3.1</jaxb-api>
         <poi>3.16</poi>
+        <httpClient.version>4.5.13</httpClient.version>
+        <redis.version>2.6.12</redis.version>
+        <spring-boot-starter-test.version>2.5.9</spring-boot-starter-test.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -121,6 +124,20 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-data-redis</artifactId>
+                <version>${redis.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpClient.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring-boot-starter-test.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <!--微信支付-->
