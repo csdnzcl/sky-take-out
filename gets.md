@@ -273,3 +273,11 @@ public class CommonController {
 5. @Transaction：开启事务---多表操作
 6. @PathVariable 路径参数
 7. HttpClien
+
+## day05 套餐管理 + Cache
+1. 缓存注解
++ @EnableCaching：启动类中添加，启动缓存功能
++ @Cacheable：如果有，直接给；如果没有，查完存起来
++ @CachePut：不管有没有，我都要执行方法，把结果存进去
++ @CacheEvict：把脏数据清理掉
++ 
